@@ -1,0 +1,47 @@
+{
+  "name": "pulser-web-interface",
+  "version": "1.0.0",
+  "description": "Web interface for Pulser with Claude integration",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/InsightPulseAI/pulser-web-interface.git"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "start:backend": "node backend/webhook_listener.js",
+    "dev:backend": "nodemon backend/webhook_listener.js",
+    "start:frontend": "cd frontend && npm run start",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build": "cd frontend && npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "next": "^13.4.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.1",
+    "nodemon": "^2.0.22",
+    "eslint": "^8.41.0",
+    "eslint-config-next": "^13.4.4"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": [
+    "pulser",
+    "claude",
+    "web-interface",
+    "ai"
+  ],
+  "author": "InsightPulseAI",
+  "license": "MIT"
+}
