@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "builds": [{ "src": "webhook_listener.js", "use": "@vercel/node" }],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "webhook_listener.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

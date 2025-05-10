@@ -14,9 +14,18 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
+// Load environment variables
+try {
+  require('dotenv').config();
+} catch (e) {
+  console.log('dotenv not installed, skipping .env file loading');
+}
+
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3333;
+const LLM_PROVIDER = process.env.LLM_PROVIDER || 'claude';
+const VERSION = '2.0.1';
 
 // Configure middleware
 app.use(cors());
@@ -26,13 +35,26 @@ app.use(bodyParser.json());
 const logEvent = (event, data) => {
   const timestamp = new Date().toISOString();
   const logEntry = `[${timestamp}] ${event}: ${JSON.stringify(data)}\n`;
-  
-  fs.appendFileSync(
-    path.join(process.env.HOME, '.pulser', 'webhook_log.json'),
-    logEntry,
-    'utf8'
-  );
-  
+
+  // In production (Vercel), we only log to console
+  // In development, we also write to a file
+  if (process.env.NODE_ENV !== 'production') {
+    try {
+      const logDir = process.env.HOME ? path.join(process.env.HOME, '.pulser') : '/tmp';
+      if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir, { recursive: true });
+      }
+
+      fs.appendFileSync(
+        path.join(logDir, 'webhook_log.json'),
+        logEntry,
+        'utf8'
+      );
+    } catch (e) {
+      console.error('Failed to write to log file:', e);
+    }
+  }
+
   console.log(`[${timestamp}] ${event}`, data);
 };
 
@@ -778,18 +800,57 @@ echo "Saved to ${repoPath || 'components/sketch'}/${fileName}"
   }
 });
 
-// Health check endpoint
+// Health check endpoints
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    version: VERSION,
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    version: VERSION,
+    llmProvider: LLM_PROVIDER,
+    environment: process.env.NODE_ENV || 'development',
+    endpoints: [
+      '/api/message',
+      '/api/execute-task',
+      '/api/voice',
+      '/api/claude_code',
+      '/api/sketch_generate',
+      '/api/push_sketch',
+      '/api/health'
+    ]
+  });
 });
 
 // Create necessary directories
 const ensureDirectoriesExist = () => {
+  // Skip directory creation in production (Vercel)
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Running in production mode, skipping directory creation');
+    return;
+  }
+
+  if (!process.env.HOME) {
+    console.log('HOME environment variable not set, skipping directory creation');
+    return;
+  }
+
   const pulserDir = path.join(process.env.HOME, '.pulser');
-  
+
   if (!fs.existsSync(pulserDir)) {
-    fs.mkdirSync(pulserDir, { recursive: true });
-    console.log(`Created directory: ${pulserDir}`);
+    try {
+      fs.mkdirSync(pulserDir, { recursive: true });
+      console.log(`Created directory: ${pulserDir}`);
+    } catch (e) {
+      console.error('Failed to create directory:', e);
+    }
   }
 };
 
