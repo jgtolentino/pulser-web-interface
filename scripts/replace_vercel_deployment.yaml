@@ -1,0 +1,58 @@
+task: replace-vercel-deployment
+description: Replace current Vercel deployment with new pulser-web-interface repo
+version: 1.0.0
+author: Claude
+priority: high
+params:
+  project-name: pulser-web-interface
+  repo-url: https://github.com/jgtolentino/pulser-web-interface
+  vercel-project: pulser-ai-app
+  frontend-path: /frontend
+  env-path: .env.local
+  build-command: npm run build
+  output-directory: .next
+instructions: |
+  Replace the old deployment at pulser-ai.app with the new web interface from the updated GitHub repo.
+  Ensure:
+  - The frontend directory is correctly targeted
+  - Backend routes (/api/sketch_generate, /api/push_sketch) are proxied
+  - LLM provider values from .env.local are respected
+  - Clean domain routing is retained
+steps:
+  - action: clone_repo
+    description: Clone the new repo from GitHub
+    command: git clone {repo-url} /tmp/{project-name}
+  
+  - action: setup_vercel
+    description: Connect to Vercel and target project
+    command: cd /tmp/{project-name}{frontend-path} && vercel link --project {vercel-project} --confirm
+  
+  - action: configure_deployment
+    description: Set up build configuration
+    command: cd /tmp/{project-name}{frontend-path} && echo '{"version":2,"buildCommand":"{build-command}","outputDirectory":"{output-directory}","routes":[{"src":"/api/(.*)","dest":"/api/$1"},{"src":"/(.*)","dest":"/$1"}]}' > vercel.json
+  
+  - action: deploy
+    description: Deploy to production
+    command: cd /tmp/{project-name}{frontend-path} && vercel --prod --confirm
+  
+  - action: test_deployment
+    description: Test critical routes
+    command: |
+      export DEPLOY_URL=$(vercel ls --prod {vercel-project} --json | jq -r '.[0].url')
+      curl -s "$DEPLOY_URL/" > /dev/null && echo "/ route OK"
+      curl -s "$DEPLOY_URL/sketch" > /dev/null && echo "/sketch route OK"
+      curl -s "$DEPLOY_URL/api/health" > /dev/null && echo "/api/health route OK"
+  
+  - action: notify_qa
+    description: Log success and ping Caca for QA
+    command: echo "{\"service\":\"pulser-web-interface\",\"status\":\"deployed\",\"timestamp\":\"$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")\"}" > claudia_sync.log
+
+outputs:
+  - deployment_url: URL of the new deployment
+  - log_file: claudia_sync.log
+
+tags:
+  - deployment
+  - vercel
+  - pulser-web-interface
+  - frontend

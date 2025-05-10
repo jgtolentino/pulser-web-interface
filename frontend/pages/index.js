@@ -1,39 +1,32 @@
-import { useState, useEffect } from 'react';
-import { checkHealth } from '../api-connector';
+import { useState } from 'react';
+import Head from 'next/head';
 
 export default function Home() {
-  const [status, setStatus] = useState('Checking...');
-  const [timestamp, setTimestamp] = useState('');
-  
-  useEffect(() => {
-    async function checkBackendStatus() {
-      try {
-        const health = await checkHealth();
-        setStatus(health.status);
-        setTimestamp(health.timestamp);
-      } catch (error) {
-        setStatus('offline');
-        console.error('Error checking health:', error);
-      }
-    }
-    
-    checkBackendStatus();
-  }, []);
+  // No backend health check for now - we'll show a static version
+  const [status, setStatus] = useState('pending');
+  const [timestamp, setTimestamp] = useState(new Date().toISOString());
   
   return (
     <div className="container">
+      <Head>
+        <title>Pulser Web Interface</title>
+        <meta name="description" content="Pulser Web Interface - InsightPulseAI's modern web platform" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
       <main>
-        <h1>Pulser Web Interface</h1>
-        
+        <h1>🔮 Pulser Web Interface</h1>
+
         <div className="status-card">
-          <h2>Backend Status: <span className={status === 'ok' ? 'online' : 'offline'}>{status}</span></h2>
-          {timestamp && <p>Last updated: {new Date(timestamp).toLocaleString()}</p>}
+          <h2>Backend Status: <span className={status === 'ok' ? 'online' : 'offline'}>Deployment in Progress</span></h2>
+          {timestamp && <p>Deployed: {new Date(timestamp).toLocaleString()}</p>}
+          <p className="note">The backend API is being configured. Some features may be limited.</p>
         </div>
-        
+
         <div className="navigation">
-          <a href="/chat" className="nav-link">Chat with Agents</a>
           <a href="/sketch" className="nav-link">UI Prototyper</a>
-          <a href="/tasks" className="nav-link">Task Execution</a>
+          <a href="/docs" className="nav-link">Documentation</a>
+          <a href="https://github.com/jgtolentino/pulser-web-interface" className="nav-link">GitHub</a>
         </div>
       </main>
       
@@ -45,12 +38,13 @@ export default function Home() {
           flex-direction: column;
           justify-content: center;
           align-items: center;
-          background-color: #f7f9fc;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+          background-color: #121212;
+          color: #f8f9fa;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
             Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
             sans-serif;
         }
-        
+
         main {
           padding: 4rem 0;
           flex: 1;
@@ -60,33 +54,39 @@ export default function Home() {
           align-items: center;
           max-width: 800px;
         }
-        
+
         h1 {
           font-size: 2.5rem;
           margin-bottom: 2rem;
-          color: #1e1e2e;
+          color: #cdd6f4;
         }
-        
+
         .status-card {
-          background-color: white;
+          background-color: #1e1e2e;
           border-radius: 8px;
           padding: 1.5rem;
           margin-bottom: 2rem;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
           width: 100%;
           text-align: center;
         }
-        
+
         .online {
           color: #10B981;
           font-weight: bold;
         }
-        
+
         .offline {
-          color: #EF4444;
+          color: #F59E0B;
           font-weight: bold;
         }
-        
+
+        .note {
+          color: #a6adc8;
+          font-size: 0.9rem;
+          margin-top: 1rem;
+        }
+
         .navigation {
           display: flex;
           flex-wrap: wrap;
@@ -94,7 +94,7 @@ export default function Home() {
           gap: 1rem;
           width: 100%;
         }
-        
+
         .nav-link {
           background-color: #7C3AED;
           color: white;
@@ -103,10 +103,13 @@ export default function Home() {
           text-decoration: none;
           font-weight: 500;
           transition: background-color 0.2s;
+          display: inline-block;
         }
-        
+
         .nav-link:hover {
           background-color: #6D28D9;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
       `}</style>
     </div>

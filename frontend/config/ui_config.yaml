@@ -1,0 +1,66 @@
+# Pulser Web Interface Configuration
+version: 2.0.1
+ui_mode: hybrid
+theme: dark-tech
+branding:
+  style: minimalist
+  agent_markers: avatar
+  responsive: true
+  lighting: cool-ambient
+
+layout:
+  root:
+    - Sidebar
+    - TerminalPanel
+    - OutputDisplay
+    - UploadPane
+    - StatusBar
+    - PulseUPModule
+
+components:
+  Sidebar:
+    type: collapsible
+    items:
+      - task_sessions
+      - agent_filters
+      - tag_navigator
+  TerminalPanel:
+    input_type: slash_command
+    features:
+      - command_history
+      - task_context_display
+  OutputDisplay:
+    render_modes:
+      - markdown
+      - YAML
+      - JSON
+      - table
+      - chart
+    toggles:
+      - raw_view
+      - cleaned_view
+      - expandable_blocks
+  UploadPane:
+    file_types:
+      - .pdf
+      - .mp3
+      - .json
+      - .yaml
+    tag_agents:
+      - Kalaw
+      - Echo
+      - Claudia
+  PulseUPModule:
+    tools:
+      - semantic_chunk_viewer
+      - tag_explorer
+      - similarity_matcher
+    integrations:
+      - Kalaw
+      - Maya
+  StatusBar:
+    indicators:
+      - ClaudiaSync
+      - CacaQA
+      - version_status
+      - resource_load

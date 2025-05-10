@@ -1,5 +1,7 @@
 # 🔮 Pulser Web Interface
 
+![Version](https://img.shields.io/badge/version-2.0.1-blue.svg)
+
 A modern web interface for InsightPulseAI with agent orchestration, code generation, UI prototyping, and more.
 
 ## 🚀 Core Interfaces
@@ -109,6 +111,10 @@ const result = await sendMessage(
 - [Architecture Overview](docs/ARCHITECTURE.md)
 - [Agent Routing System](docs/AGENT_ROUTING.md)
 - [LLM Abstraction Layer](docs/LLM_ABSTRACTION.md)
+- [UI Specification](docs/UI.md)
+- [UI Visualization](docs/UI_VISUALIZATION.md)
+- [Contributing Guide](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
 
 ## ⚙️ LLM Configuration
 
