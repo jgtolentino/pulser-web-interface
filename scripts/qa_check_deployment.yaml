@@ -1,0 +1,131 @@
+task: check-deployment
+description: QA verification of the Pulser Web Interface deployment
+version: 1.0.0
+agent: Caca
+priority: high
+params:
+  url: https://pulser-ai.app
+  timeout: 30000
+  routes:
+    - path: /
+      method: GET
+      expected_status: 200
+      content_check: "Pulser Web Interface"
+    - path: /sketch
+      method: GET
+      expected_status: 200
+      content_check: "UI Prototyper"
+    - path: /api/health
+      method: GET
+      expected_status: 200
+    - path: /api/sketch_generate
+      method: POST
+      body: '{"prompt":"Create a simple hero section"}'
+      expected_status: 200
+      timeout: 10000
+instructions: |
+  Run comprehensive QA checks on the newly deployed Pulser Web Interface.
+  Verify all critical routes, API endpoints, and functionality.
+  
+  Focus on:
+  1. Frontend routes load properly
+  2. Backend API endpoints respond correctly
+  3. Claude model connectivity is working
+  4. Echo rendering feedback is provided
+  5. LLM fallback works if primary provider is unavailable
+  
+  Document any warnings, errors, or performance issues.
+steps:
+  - action: check_routes
+    description: Verify all critical routes are accessible
+    command: |
+      for route in "/", "/sketch", "/api/health"; do
+        status=$(curl -s -o /dev/null -w "%{http_code}" "${URL}${route}")
+        echo "${route}: ${status}"
+        if [[ $status -ne 200 ]]; then
+          echo "❌ Route ${route} returned ${status}"
+          errors=$((errors+1))
+        fi
+      done
+  
+  - action: test_api
+    description: Test API endpoints for functionality
+    command: |
+      # Test sketch generation
+      response=$(curl -s -X POST "${URL}/api/sketch_generate" \
+        -H "Content-Type: application/json" \
+        -d '{"prompt":"Create a simple hero section"}')
+      
+      if [[ $response == *"error"* ]]; then
+        echo "❌ Sketch generation API failed"
+        errors=$((errors+1))
+      else
+        echo "✅ Sketch generation API working"
+      fi
+  
+  - action: check_claude_connectivity
+    description: Verify Claude model connectivity
+    command: |
+      response=$(curl -s -X POST "${URL}/api/message" \
+        -H "Content-Type: application/json" \
+        -d '{"message":"Hello, Claudia","agent":"claudia"}')
+      
+      if [[ $response == *"error"* ]] || [[ $response == "" ]]; then
+        echo "❌ Claude connectivity issues detected"
+        errors=$((errors+1))
+      else
+        echo "✅ Claude connectivity confirmed"
+      fi
+  
+  - action: check_echo_rendering
+    description: Verify Echo visual feedback functionality
+    command: |
+      response=$(curl -s -X POST "${URL}/api/sketch_generate" \
+        -H "Content-Type: application/json" \
+        -d '{"prompt":"Create a simple button","echo_review":true}')
+      
+      if [[ $response == *"echoReview"* ]]; then
+        echo "✅ Echo rendering is working"
+      else
+        echo "⚠️ Echo rendering may have issues"
+        warnings=$((warnings+1))
+      fi
+  
+  - action: test_llm_fallback
+    description: Verify LLM fallback functionality
+    command: |
+      response=$(curl -s -X POST "${URL}/api/message" \
+        -H "Content-Type: application/json" \
+        -d '{"message":"Test fallback","provider":"invalid"}')
+      
+      if [[ $response == *"fallback"* ]]; then
+        echo "✅ LLM fallback is working"
+      else
+        echo "⚠️ LLM fallback may need configuration"
+        warnings=$((warnings+1))
+      fi
+  
+  - action: performance_check
+    description: Check basic performance metrics
+    command: |
+      start_time=$(date +%s%N)
+      curl -s "${URL}/" > /dev/null
+      end_time=$(date +%s%N)
+      load_time=$(( ($end_time - $start_time) / 1000000 ))
+      
+      echo "Homepage load time: ${load_time}ms"
+      if (( $load_time > 2000 )); then
+        echo "⚠️ Homepage load time exceeds 2 seconds"
+        warnings=$((warnings+1))
+      fi
+
+outputs:
+  - qa_report: Detailed QA verification report
+  - issues_found: Number of issues or warnings detected
+  - status: overall status (passed/warning/failed)
+
+tags:
+  - qa
+  - deployment
+  - verification
+  - caca

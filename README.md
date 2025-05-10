@@ -1,8 +1,14 @@
 # 🔮 Pulser Web Interface
 
 ![Version](https://img.shields.io/badge/version-2.0.1-blue.svg)
+![Deployment](https://img.shields.io/badge/deployment-active-success.svg)
 
 A modern web interface for InsightPulseAI with agent orchestration, code generation, UI prototyping, and more.
+
+## 🌐 Live Deployment
+
+🔗 [https://pulser-ai.app](https://pulser-ai.app) — Pulser Web Interface
+Hosted on Vercel, auto-deploys from `main` branch.
 
 ## 🚀 Core Interfaces
 
