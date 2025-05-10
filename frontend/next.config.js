@@ -5,10 +5,11 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || '/api',
     NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || '/api',
+    NEXT_PUBLIC_IS_MOCK_API: 'true',
   },
   async rewrites() {
+    // API mock routes for development and demo
     return [
-      // API mock routes for development and demo
       {
         source: '/api/health',
         destination: '/api/mock/health',
@@ -21,11 +22,6 @@ const nextConfig = {
         source: '/api/sketch_generate',
         destination: '/api/mock/sketch_generate',
       },
-      // If a real backend is available, uncomment and update this:
-      // {
-      //   source: '/api/:path*',
-      //   destination: `${process.env.NEXT_PUBLIC_API_URL || 'https://pulser-api.jgtolentino.com'}/api/:path*`,
-      // },
     ];
   },
   // Output as standalone for easier deployment

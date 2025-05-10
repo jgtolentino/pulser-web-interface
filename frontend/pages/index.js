@@ -1,10 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 
 export default function Home() {
-  // No backend health check for now - we'll show a static version
   const [status, setStatus] = useState('pending');
   const [timestamp, setTimestamp] = useState(new Date().toISOString());
+  const [apiHealth, setApiHealth] = useState(null);
+
+  // Check API health status
+  useEffect(() => {
+    async function checkApiHealth() {
+      try {
+        // Use fetch with no-cache to prevent caching
+        const response = await fetch('/api/health', {
+          cache: 'no-cache',
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+
+        if (response.ok) {
+          const health = await response.json();
+          setApiHealth(health);
+          setStatus('ok');
+        } else {
+          console.error('Health check failed:', response.status);
+          setStatus('offline');
+        }
+      } catch (error) {
+        console.error('Error checking health:', error);
+        setStatus('offline');
+      }
+    }
+
+    checkApiHealth();
+
+    // Refresh every 30 seconds
+    const interval = setInterval(checkApiHealth, 30000);
+    return () => clearInterval(interval);
+  }, []);
   
   return (
     <div className="container">
@@ -18,9 +49,20 @@ export default function Home() {
         <h1>🔮 Pulser Web Interface</h1>
 
         <div className="status-card">
-          <h2>Backend Status: <span className={status === 'ok' ? 'online' : 'offline'}>Deployment in Progress</span></h2>
+          <h2>Backend Status: <span className={status === 'ok' ? 'online' : 'offline'}>
+            {status === 'ok' ? 'Connected' : 'Deployment in Progress'}
+          </span></h2>
           {timestamp && <p>Deployed: {new Date(timestamp).toLocaleString()}</p>}
-          <p className="note">The backend API is being configured. Some features may be limited.</p>
+
+          {apiHealth ? (
+            <div className="api-info">
+              <p>API Version: {apiHealth.version}</p>
+              <p>Provider: {apiHealth.llmProvider || 'claude'}</p>
+              <p className="note">Using mock API endpoints for demo purposes</p>
+            </div>
+          ) : (
+            <p className="note">The backend API is being configured. Some features may be limited.</p>
+          )}
         </div>
 
         <div className="navigation">
@@ -85,6 +127,18 @@ export default function Home() {
           color: #a6adc8;
           font-size: 0.9rem;
           margin-top: 1rem;
+        }
+
+        .api-info {
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          font-size: 0.9rem;
+        }
+
+        .api-info p {
+          margin: 0.3rem 0;
+          color: #cdd6f4;
         }
 
         .navigation {
