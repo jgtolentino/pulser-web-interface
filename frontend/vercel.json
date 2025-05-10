@@ -1,26 +1,15 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
+  "framework": "nextjs",
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "https://pulser-api.jgtolentino.com/api/$1"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
     }
   ],
   "env": {
     "NEXT_PUBLIC_API_URL": "https://pulser-api.jgtolentino.com",
     "NEXT_PUBLIC_BACKEND_URL": "https://pulser-api.jgtolentino.com"
-  }
+  },
+  "public": true
 }
