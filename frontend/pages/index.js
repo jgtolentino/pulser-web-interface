@@ -10,8 +10,8 @@ export default function Home() {
   useEffect(() => {
     async function checkApiHealth() {
       try {
-        // Use fetch with no-cache to prevent caching
-        const response = await fetch('/api/health', {
+        // Try mock endpoint directly first, then fall back to the regular endpoint
+        const response = await fetch('/api/mock/health', {
           cache: 'no-cache',
           headers: { 'Cache-Control': 'no-cache' }
         });
