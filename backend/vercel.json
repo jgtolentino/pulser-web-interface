@@ -1,13 +1,15 @@
 {
   "version": 2,
-  "builds": [{ "src": "webhook_listener.js", "use": "@vercel/node" }],
+  "name": "pulser-api",
+  "public": true,
+  "builds": [
+    { "src": "webhook_listener.js", "use": "@vercel/node" }
+  ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "webhook_listener.js"
-    }
+    { "src": "/(.*)", "dest": "webhook_listener.js" }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "LLM_PROVIDER": "claude"
   }
 }

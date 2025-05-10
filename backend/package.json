@@ -5,8 +5,7 @@
   "main": "webhook_listener.js",
   "scripts": {
     "start": "node webhook_listener.js",
-    "dev": "nodemon webhook_listener.js",
-    "vercel-build": "pip install -r requirements.txt"
+    "dev": "nodemon webhook_listener.js"
   },
   "dependencies": {
     "body-parser": "^1.20.2",
